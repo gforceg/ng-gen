@@ -1,0 +1,32 @@
+{
+	"barrel": {
+		"command": "barrel",
+		"description": "create an angular 2 barrel",
+		"example": "ng-gen barrel subDirectory1 subDirectory2 subDirectoryN",
+		"outFileTemplate": "~fileName-\\~"
+	},
+	"component": {
+		"command": "component",
+		"description": "create an angular 2 component",
+		"example": "ng-gen component component1 component2 componentN -d",
+		"outFileTemplate": "~fileName-\\~.component"
+	},
+	"inline-component": {
+		"command": "inline-component",
+		"description": "create an angular 2 component with inline html and css",
+		"example": "ng-gen inline-component component1 component2 componentN -d",
+		"outFileTemplate": "~fileName-\\~.component"
+	},
+	"module": {
+		"command": "module",
+		"description": "create an angular 2 module",
+		"example": "ng-gen module module1 module2 moduleN",
+		"outFileTemplate": "~fileName-\\~.module"
+	},
+	"service": {
+		"command": "service",
+		"description": "create an angular 2 service",
+		"example": "ng-gen service service1 service2 serviceN -d",
+		"outFileTemplate": "~fileName-\\~.service"
+	}
+}

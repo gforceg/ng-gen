@@ -1,0 +1,1 @@
+{"command": "inline-component", "description": "create an angular 2 component with inline html and css", "example": "ng-gen inline-component component1 component2 componentN -d", "outFileTemplate": "~fileName-\\~.component" }

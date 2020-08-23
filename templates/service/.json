@@ -1,0 +1,1 @@
+{"command": "service", "description": "create an angular 2 service", "example": "ng-gen service service1 service2 serviceN -d", "outFileTemplate": "~fileName-\\~.service" }

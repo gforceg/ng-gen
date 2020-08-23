@@ -1,0 +1,1 @@
+{"command": "component", "description": "create an angular 2 component", "example": "ng-gen component component1 component2 componentN -d", "outFileTemplate": "~fileName-\\~.component"  }

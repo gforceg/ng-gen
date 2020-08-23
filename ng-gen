@@ -1,0 +1,133 @@
+#!/usr/bin/env node
+
+let path = require('path');
+
+process.title = 'ng-gen';
+// Greg Hedin
+
+// fyi:
+// to implement a new command:
+// 1. create a new subdirectory in 'templates/'
+// 2. create '.json' and give it an object of { command, description, example }
+// 3. add your templates using any combination of the following file names '.html', '.css', '.ts', or '.js'
+// 4. optionally add a callback function
+// 5. run rebuild.js
+
+// ng2- cli steps:
+// 1. if there are not enough args, or they provide a bad command, suggest they ask for help.
+let appUtils = require('./utils.js');
+let argv = require('./argv.js').argv;
+// let resolve = require('resolve').sync;
+
+// console.log(__dirname);
+// console.dir(resolve('ng2-', null));
+
+let DEBUG_MODE = argv.v;
+
+let prefix = appUtils.getGlobalPrefix();
+
+let availableCommands = JSON.parse(appUtils.tryReadFile(prefix, 'cmd.json'));
+if (!availableCommands) {
+  return -1;
+}
+
+function askForHelp() { console.log('ng-gen -h for help'); }
+
+if (argv._.length < 2) {
+  askForHelp();
+  return;
+}
+
+let templates = appUtils.getTemplateDirectories();
+
+if (!templates) {
+  // console.log('failed to load templates');
+  return;
+}
+
+let cmd = argv._[0].toLowerCase();
+
+if (availableCommands[cmd] === undefined) {
+  askForHelp();
+  return;
+}
+
+let objects = argv._.slice(1);
+
+var Templater = require('space-case-templates').Templater;
+let t = new Templater();
+
+let templateBundle = appUtils.getTemplateBundle(cmd);
+
+// let customObjectsAndPlugs = appUtils.getObjsWithPlugs(cmd, objects);
+
+// plug in the template for each object
+objects.forEach(obj => {
+  let oPlugs = appUtils.getCustomPlugs(cmd, obj);
+  obj = appUtils.toFile(obj);
+  if (!oPlugs) {
+    oPlugs = {
+      className: obj,
+      fileName: obj
+    };
+  }
+  generateFile(obj, oPlugs);
+});
+
+function generateFile(obj, plugs) {
+  let outDir = '';
+
+  if (argv.d) {
+    outDir = t.plug('~className-\\~/', plugs);
+
+    if (!appUtils.dirExists(outDir)) {
+      appUtils.tryMkDir(outDir);
+    }
+  }
+
+  outDir = path.join(process.cwd(), outDir);
+  // console.log('outDir: %s', outDir);
+  for (let ext in templateBundle) {
+    let outFile = t.plug(availableCommands[cmd].outFileTemplate + ext, plugs);
+    let outFilePath = outDir + outFile;
+    //  try to fill outBuffer using the custom fillTemplate function for this command.
+    let outBuffer = null;
+
+    if (!outBuffer) {
+      outBuffer = t.plug(templateBundle[ext], plugs);
+      if (DEBUG_MODE) {
+        console.log('** BUFFER => %s **', outFilePath);
+        console.log(outBuffer);
+        console.log('** EOF **');
+      }
+    }
+
+    // before creating the file
+    // find out what the next module is
+    // this way, if the new file is a module, it doesn't try to import and export
+    // its self.
+    let nextModuleFileAboveMe;
+    let exportedClassName = appUtils.getExportedClassname(outBuffer);
+
+    if (exportedClassName) {
+      nextModuleFileAboveMe = appUtils.getNextModule(outDir);
+    }
+    outFile = path.join(outFile);
+    appUtils.tryWriteFile(outDir, outFile, outBuffer);
+
+    if (exportedClassName) {
+      if (!nextModuleFileAboveMe) {
+        console.log('could not find next module\nno auto import/export');
+        console.log('next module above me: %s', nextModuleFileAboveMe);
+      } else {
+        appUtils.autoModuleMeta(nextModuleFileAboveMe, path.join(outDir, outFile));
+      }
+    }
+  }
+}
+
+function loadTemplates() {
+  let prefix = '';
+  let templateFilePrefix = prefix + cmd;
+  return appUtils.getTemplatesBundle(templateFilePrefix);
+}

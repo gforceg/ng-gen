@@ -1,0 +1,1 @@
+{"command": "barrel", "description": "create an angular 2 barrel", "example": "ng-gen barrel subDirectory1 subDirectory2 subDirectoryN", "outFileTemplate": "~fileName-\\~" }

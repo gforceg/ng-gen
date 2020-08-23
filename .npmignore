@@ -1,0 +1,6 @@
+node_modules/
+.vscode/
+README.pdf
+test/
+jsconfig.json
+readme/
